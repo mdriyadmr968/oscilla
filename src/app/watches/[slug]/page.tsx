@@ -51,5 +51,42 @@ export default async function WatchDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <WatchDetailClient watch={watch} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: watch.name,
+    image: watch.images.hero,
+    description: watch.description,
+    sku: watch.referenceNumber,
+    mpn: watch.referenceNumber,
+    brand: {
+      "@type": "Brand",
+      name: "Oscilla Horlogerie",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `https://oscilla.store/watches/${watch.slug}`,
+      priceCurrency: "USD",
+      price: watch.price,
+      itemCondition: "https://schema.org/NewCondition",
+      availability: watch.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: watch.rating,
+      reviewCount: watch.reviewCount,
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <WatchDetailClient watch={watch} />
+    </>
+  );
 }
