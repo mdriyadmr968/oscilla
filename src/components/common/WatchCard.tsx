@@ -7,6 +7,8 @@ import { Heart, Eye, ShoppingBag, Check } from "lucide-react";
 import { WatchProduct } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useCurrencyStore } from "@/lib/store/currencyStore";
+import { useHydrated } from "@/lib/hooks/useHydrated";
 
 interface WatchCardProps {
   watch: WatchProduct;
@@ -17,6 +19,8 @@ export function WatchCard({ watch, onQuickView }: WatchCardProps) {
   const isInWishlist = useCartStore((state) => state.isInWishlist(watch.id));
   const toggleWishlist = useCartStore((state) => state.toggleWishlist);
   const addItem = useCartStore((state) => state.addItem);
+  const formatPrice = useCurrencyStore((state) => state.formatPrice);
+  const mounted = useHydrated();
 
   const [justAdded, setJustAdded] = useState(false);
 
@@ -122,11 +126,11 @@ export function WatchCard({ watch, onQuickView }: WatchCardProps) {
         <div className="pt-3.5 mt-3 border-t border-[#1b1e2a] flex items-center justify-between">
           <div className="flex items-baseline gap-2">
             <span className="text-base font-bold text-white font-mono">
-              {formatCurrency(watch.price)}
+              {mounted ? formatPrice(watch.price) : formatCurrency(watch.price)}
             </span>
             {watch.originalPrice && (
               <span className="text-xs text-neutral-500 line-through font-mono">
-                {formatCurrency(watch.originalPrice)}
+                {mounted ? formatPrice(watch.originalPrice) : formatCurrency(watch.originalPrice)}
               </span>
             )}
           </div>

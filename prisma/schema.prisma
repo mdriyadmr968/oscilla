@@ -1,0 +1,135 @@
+// Oscilla Horlogerie — Prisma Database Schema Architecture
+// Configured for PostgreSQL (Supabase / Neon / AWS RDS)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum MovementType {
+  AUTOMATIC
+  CHRONOGRAPH
+  MANUAL_WIND
+  TOURBILLON
+  QUARTZ
+}
+
+enum OrderPaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PREPARING
+  CHRONOMETER_CHECK
+  DISPATCHED
+  DELIVERED
+}
+
+model Watch {
+  id                 String       @id @default(cuid())
+  slug               String       @unique
+  name               String
+  tagline            String
+  referenceNumber    String       @unique
+  price              Int
+  originalPrice      Int?
+  inStock            Boolean      @default(true)
+  stockCount         Int          @default(5)
+  collection         String
+  description        String
+  features           String[]
+  caliber            String
+  powerReserveHours  Int
+  frequencyVph       Int
+  jewelsCount        Int
+  diameterMm         Int
+  thicknessMm        Float
+  lugToLugMm         Float
+  caseMaterial       String
+  dialColor          String
+  crystal            String
+  waterResistanceAtm Int
+  defaultStrap       String
+  lugWidthMm         Int
+  claspType          String
+  heroImage          String
+  galleryImages      String[]
+  isFeatured         Boolean      @default(false)
+  isNewArrival       Boolean      @default(false)
+  rating             Float        @default(5.0)
+  reviewCount        Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  orderItems         OrderItem[]
+  warranties         WarrantyCertificate[]
+}
+
+model Customer {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  fullName      String
+  phone         String?
+  streetAddress String?
+  city          String?
+  stateProvince String?
+  postalCode    String?
+  country       String?   @default("United States")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+}
+
+model Order {
+  id                 String             @id @default(cuid())
+  orderNumber        String             @unique // e.g. OSC-2026-928172
+  customerId         String
+  customer           Customer           @relation(fields: [customerId], references: [id])
+  subtotal           Int
+  shippingFee        Int                @default(0)
+  discount           Int                @default(0)
+  total              Int
+  paymentStatus      OrderPaymentStatus @default(PAID)
+  fulfillmentStatus  FulfillmentStatus  @default(PREPARING)
+  courierName        String?            @default("Brink's Global Armored")
+  trackingNumber     String?
+  stripeSessionId    String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  items              OrderItem[]
+  certificates       WarrantyCertificate[]
+}
+
+model OrderItem {
+  id             String    @id @default(cuid())
+  orderId        String
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  watchId        String
+  watch          Watch     @relation(fields: [watchId], references: [id])
+  selectedStrap  String
+  unitPrice      Int
+  quantity       Int       @default(1)
+}
+
+model WarrantyCertificate {
+  id            String    @id @default(cuid())
+  certificateId String    @unique // e.g. OSC-CERT-9281
+  serialNumber  String    @unique // e.g. OSC-CAL-88219
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  watchId       String
+  watch         Watch     @relation(fields: [watchId], references: [id])
+  registeredAt  DateTime  @default(now())
+  expiresAt     DateTime
+  status        String    @default("ACTIVE")
+}

@@ -24,8 +24,11 @@ import { WatchProduct, StrapMaterial } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { STRAP_OPTIONS, WATCHES_DATA } from "@/lib/data/watches";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useCurrencyStore } from "@/lib/store/currencyStore";
+import { useHydrated } from "@/lib/hooks/useHydrated";
 import { WristVisualizerModal } from "./WristVisualizerModal";
 import { WatchCard } from "@/components/common/WatchCard";
+import { WatchStudioInspector } from "./WatchStudioInspector";
 
 interface WatchDetailClientProps {
   watch: WatchProduct;
@@ -33,6 +36,9 @@ interface WatchDetailClientProps {
 
 export function WatchDetailClient({ watch }: WatchDetailClientProps) {
   const router = useRouter();
+  const formatPrice = useCurrencyStore((state) => state.formatPrice);
+  const mounted = useHydrated();
+
   const [activeImage, setActiveImage] = useState(0);
   const [selectedStrap, setSelectedStrap] = useState<StrapMaterial>(
     watch.specs.strap.defaultMaterial
@@ -181,11 +187,11 @@ export function WatchDetailClient({ watch }: WatchDetailClientProps) {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl sm:text-3xl font-bold font-mono text-white">
-                  {formatCurrency(unitPrice)}
+                  {mounted ? formatPrice(unitPrice) : formatCurrency(unitPrice)}
                 </span>
                 {watch.originalPrice && (
                   <span className="text-xs text-neutral-500 line-through font-mono">
-                    {formatCurrency(watch.originalPrice)}
+                    {mounted ? formatPrice(watch.originalPrice) : formatCurrency(watch.originalPrice)}
                   </span>
                 )}
               </div>
@@ -252,7 +258,7 @@ export function WatchDetailClient({ watch }: WatchDetailClientProps) {
                     </span>
                   </div>
                   <span className="font-mono text-xs text-neutral-300">
-                    {strap.priceDelta > 0 ? `+${formatCurrency(strap.priceDelta)}` : "Standard"}
+                    {strap.priceDelta > 0 ? `+${mounted ? formatPrice(strap.priceDelta) : formatCurrency(strap.priceDelta)}` : "Standard"}
                   </span>
                 </button>
               ))}
@@ -332,6 +338,11 @@ export function WatchDetailClient({ watch }: WatchDetailClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Interactive 360 Studio Loupe & Lume Night-Glow Inspector */}
+      <section className="mb-20">
+        <WatchStudioInspector watch={watch} />
+      </section>
 
       {/* Horological Dossier Accordion/Tabs */}
       <section className="mb-20 bg-[#10121b] border border-[#212534] rounded-2xl p-6 sm:p-10">
