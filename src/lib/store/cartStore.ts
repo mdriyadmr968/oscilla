@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CartItem, OrderRecord, StrapMaterial, WatchProduct } from "../types";
+import { getStrapDelta } from "../data/watches";
 
 interface CartStoreState {
   items: CartItem[];
@@ -50,11 +51,12 @@ export const useCartStore = create<CartStoreState>()(
         const itemId = `${watch.id}-${strap}`;
         const currentItems = get().items;
         const existingIndex = currentItems.findIndex((item) => item.id === itemId);
+        const unitPrice = watch.price + getStrapDelta(strap);
 
         if (existingIndex > -1) {
           const updated = [...currentItems];
           const newQty = Math.min(updated[existingIndex].quantity + quantity, watch.stockCount || 10);
-          updated[existingIndex] = { ...updated[existingIndex], quantity: newQty };
+          updated[existingIndex] = { ...updated[existingIndex], quantity: newQty, unitPrice };
           set({ items: updated, isCartOpen: true });
         } else {
           set({
@@ -65,6 +67,7 @@ export const useCartStore = create<CartStoreState>()(
                 watch,
                 quantity: Math.min(quantity, watch.stockCount || 10),
                 selectedStrap: strap,
+                unitPrice,
               },
             ],
             isCartOpen: true,
@@ -99,18 +102,24 @@ export const useCartStore = create<CartStoreState>()(
         if (!item) return;
 
         const newId = `${item.watch.id}-${newStrap}`;
+        const updatedUnitPrice = item.watch.price + getStrapDelta(newStrap);
         const remaining = get().items.filter((i) => i.id !== itemId);
         const existingTarget = remaining.find((i) => i.id === newId);
 
         if (existingTarget) {
           set({
             items: remaining.map((i) =>
-              i.id === newId ? { ...i, quantity: i.quantity + item.quantity } : i
+              i.id === newId
+                ? { ...i, quantity: i.quantity + item.quantity, unitPrice: updatedUnitPrice }
+                : i
             ),
           });
         } else {
           set({
-            items: [...remaining, { ...item, id: newId, selectedStrap: newStrap }],
+            items: [
+              ...remaining,
+              { ...item, id: newId, selectedStrap: newStrap, unitPrice: updatedUnitPrice },
+            ],
           });
         }
       },

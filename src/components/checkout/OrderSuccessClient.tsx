@@ -11,6 +11,16 @@ interface OrderSuccessClientProps {
   orderId: string;
 }
 
+function getWatchSerial(watchId: string, orderId: string) {
+  let hash = 0;
+  const str = `${orderId}-${watchId}`;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return `OSC-CAL-${Math.abs(hash % 90000) + 10000}`;
+}
+
 export function OrderSuccessClient({ orderId }: OrderSuccessClientProps) {
   const orders = useCartStore((state) => state.orders);
 
@@ -82,7 +92,7 @@ export function OrderSuccessClient({ orderId }: OrderSuccessClientProps) {
                 </div>
                 <div className="flex-1 min-w-0 text-xs">
                   <span className="font-mono text-amber-400 text-[10px] block">
-                    REF: {item.watch.referenceNumber} • SERIAL: OSC-CAL-{(Math.random() * 10000).toFixed(0)}
+                    REF: {item.watch.referenceNumber} • SERIAL: {getWatchSerial(item.watch.id, order?.id || orderId)}
                   </span>
                   <div className="font-bold text-white truncate">{item.watch.name}</div>
                   <div className="text-neutral-400 text-[11px]">
@@ -90,7 +100,7 @@ export function OrderSuccessClient({ orderId }: OrderSuccessClientProps) {
                   </div>
                 </div>
                 <div className="text-right font-mono text-xs font-bold text-amber-300">
-                  {formatCurrency(item.watch.price * item.quantity)}
+                  {formatCurrency((item.unitPrice || item.watch.price) * item.quantity)}
                 </div>
               </div>
             ))}

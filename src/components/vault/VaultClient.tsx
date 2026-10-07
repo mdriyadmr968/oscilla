@@ -7,26 +7,26 @@ import {
   Heart,
   Package,
   Award,
-  ShieldCheck,
   ShoppingBag,
-  ArrowRight,
-  Clock,
-  Sparkles,
   ExternalLink,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useHydrated } from "@/lib/hooks/useHydrated";
 import { WATCHES_DATA } from "@/lib/data/watches";
 import { formatCurrency } from "@/lib/utils";
 
 export function VaultClient() {
   const [activeTab, setActiveTab] = useState<"wishlist" | "orders" | "warranty">("wishlist");
+  const mounted = useHydrated();
 
   const wishlistIds = useCartStore((state) => state.wishlistIds);
   const toggleWishlist = useCartStore((state) => state.toggleWishlist);
   const addItem = useCartStore((state) => state.addItem);
   const orders = useCartStore((state) => state.orders);
 
-  const wishlistWatches = WATCHES_DATA.filter((w) => wishlistIds.includes(w.id));
+  const activeWishlistIds = mounted ? wishlistIds : [];
+  const activeOrders = mounted ? orders : [];
+  const wishlistWatches = WATCHES_DATA.filter((w) => activeWishlistIds.includes(w.id));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
@@ -47,7 +47,7 @@ export function VaultClient() {
       <div className="flex flex-wrap gap-2 mb-8 border-b border-[#1f2231] pb-4">
         {[
           { id: "wishlist", label: `Saved Wishlist (${wishlistWatches.length})`, icon: Heart },
-          { id: "orders", label: `Acquisition Orders (${orders.length})`, icon: Package },
+          { id: "orders", label: `Acquisition Orders (${activeOrders.length})`, icon: Package },
           { id: "warranty", label: "Registered Caliber Warranties", icon: Award },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -149,7 +149,7 @@ export function VaultClient() {
       {/* Tab 2: Orders */}
       {activeTab === "orders" && (
         <div className="space-y-6">
-          {orders.length === 0 ? (
+          {activeOrders.length === 0 ? (
             <div className="bg-[#10121b] border border-[#212534] rounded-2xl p-12 text-center max-w-lg mx-auto">
               <div className="w-14 h-14 rounded-full bg-[#171926] text-neutral-500 flex items-center justify-center mx-auto mb-4">
                 <Package className="w-7 h-7" />
@@ -168,7 +168,7 @@ export function VaultClient() {
               </Link>
             </div>
           ) : (
-            orders.map((order) => (
+            activeOrders.map((order) => (
               <div
                 key={order.id}
                 className="p-6 rounded-2xl bg-[#11131c] border border-[#202432] space-y-4"

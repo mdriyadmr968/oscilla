@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Sparkles, Award, Compass, Clock, Activity, Layers } from "lucide-react";
+import { ShieldCheck, Activity, Layers } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Atelier Heritage & Chronometer Craft — Oscilla",

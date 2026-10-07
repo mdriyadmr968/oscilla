@@ -67,6 +67,7 @@ export interface CartItem {
   watch: WatchProduct;
   quantity: number;
   selectedStrap: StrapMaterial;
+  unitPrice: number; // watch base price + strap priceDelta
 }
 
 export interface OrderCustomerInfo {

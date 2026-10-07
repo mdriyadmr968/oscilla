@@ -51,7 +51,10 @@ export function CheckoutClient() {
     nameOnCard: "",
   });
 
-  const subtotal = items.reduce((sum, item) => sum + item.watch.price * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.unitPrice || item.watch.price) * item.quantity,
+    0
+  );
   const discountAmount = subtotal * discountPercentage;
   const shippingFee = shippingMethod === "white_glove" ? 150 : 0;
   const total = Math.max(0, subtotal - discountAmount + shippingFee);
@@ -490,7 +493,7 @@ export function CheckoutClient() {
                   </div>
                 </div>
                 <div className="text-right font-mono font-bold text-white">
-                  {formatCurrency(item.watch.price * item.quantity)}
+                  {formatCurrency((item.unitPrice || item.watch.price) * item.quantity)}
                 </div>
               </div>
             ))}

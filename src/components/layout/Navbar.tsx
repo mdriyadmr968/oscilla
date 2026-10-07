@@ -3,20 +3,23 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, ShoppingBag, Heart, Menu, X, Shield, Sparkles } from "lucide-react";
+import { Search, ShoppingBag, Heart, Menu, X, Shield } from "lucide-react";
 import { useCartStore } from "@/lib/store/cartStore";
+import { useHydrated } from "@/lib/hooks/useHydrated";
 import { SearchModal } from "./SearchModal";
 
 export function Navbar() {
   const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mounted = useHydrated();
 
   const items = useCartStore((state) => state.items);
   const openCart = useCartStore((state) => state.openCart);
   const wishlistIds = useCartStore((state) => state.wishlistIds);
 
-  const totalCartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalCartCount = mounted ? items.reduce((acc, item) => acc + item.quantity, 0) : 0;
+  const wishlistCount = mounted ? wishlistIds.length : 0;
 
   const navLinks = [
     { label: "All Timepieces", href: "/catalog" },
@@ -92,9 +95,9 @@ export function Navbar() {
               title="Saved in Vault"
             >
               <Heart className="w-5 h-5" />
-              {wishlistIds.length > 0 && (
+              {wishlistCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center font-mono">
-                  {wishlistIds.length}
+                  {wishlistCount}
                 </span>
               )}
             </Link>
@@ -144,7 +147,7 @@ export function Navbar() {
                 className="flex items-center gap-1.5 hover:text-white"
               >
                 <Heart className="w-4 h-4 text-amber-400" />
-                <span>Collector Vault ({wishlistIds.length})</span>
+                <span>Collector Vault ({wishlistCount})</span>
               </Link>
               <Link
                 href="/admin"

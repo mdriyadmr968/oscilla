@@ -336,3 +336,9 @@ export const STRAP_OPTIONS: { name: import("../types").StrapMaterial; descriptio
   { name: "Milanese Mesh", description: "Fluid woven stainless mesh with infinitely adjustable slide lock", priceDelta: 90 },
   { name: "Hand-stitched Alligator", description: "Bespoke formal dress strap with matte satin treatment", priceDelta: 180 },
 ];
+
+export function getStrapDelta(strapName: import("../types").StrapMaterial): number {
+  const match = STRAP_OPTIONS.find((s) => s.name === strapName);
+  return match ? match.priceDelta : 0;
+}
+

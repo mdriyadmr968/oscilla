@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Compass, ShieldCheck, Sparkles, Activity } from "lucide-react";
+import { ArrowRight, Compass, Sparkles, Activity } from "lucide-react";
 
 export function Hero() {
   return (

@@ -9,11 +9,7 @@ import {
   Layers,
   TrendingUp,
   AlertTriangle,
-  Plus,
-  CheckCircle2,
   ExternalLink,
-  Truck,
-  RotateCcw,
   Search,
 } from "lucide-react";
 import { WATCHES_DATA } from "@/lib/data/watches";

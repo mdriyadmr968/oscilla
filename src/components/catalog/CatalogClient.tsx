@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SlidersHorizontal, X, RotateCcw, ChevronDown, Check } from "lucide-react";
 import { WATCHES_DATA } from "@/lib/data/watches";
@@ -23,30 +23,27 @@ export function CatalogClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
-  const [selectedMovements, setSelectedMovements] = useState<MovementType[]>([]);
-  const [selectedMaterials, setSelectedMaterials] = useState<CaseMaterial[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>(() => {
+    const colParam = searchParams.get("collection");
+    return colParam ? [colParam] : [];
+  });
+  const [selectedMovements, setSelectedMovements] = useState<MovementType[]>(() => {
+    const moveParam = searchParams.get("movement");
+    return moveParam && MOVEMENTS.includes(moveParam as MovementType)
+      ? [moveParam as MovementType]
+      : [];
+  });
+  const [selectedMaterials, setSelectedMaterials] = useState<CaseMaterial[]>(() => {
+    const matParam = searchParams.get("material");
+    return matParam && MATERIALS.includes(matParam as CaseMaterial)
+      ? [matParam as CaseMaterial]
+      : [];
+  });
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("featured");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState<boolean>(false);
   const [selectedWatch, setSelectedWatch] = useState<WatchProduct | null>(null);
-
-  // Sync initial state from URL query parameters
-  useEffect(() => {
-    const colParam = searchParams.get("collection");
-    if (colParam) {
-      setSelectedCollections([colParam]);
-    }
-    const moveParam = searchParams.get("movement");
-    if (moveParam && MOVEMENTS.includes(moveParam as MovementType)) {
-      setSelectedMovements([moveParam as MovementType]);
-    }
-    const matParam = searchParams.get("material");
-    if (matParam && MATERIALS.includes(matParam as CaseMaterial)) {
-      setSelectedMaterials([matParam as CaseMaterial]);
-    }
-  }, [searchParams]);
 
   const toggleCollection = (c: string) => {
     setSelectedCollections((prev) =>

@@ -26,7 +26,10 @@ export function CartDrawer() {
   const [promoInput, setPromoInput] = useState("");
   const [promoFeedback, setPromoFeedback] = useState<{ message: string; isError: boolean } | null>(null);
 
-  const subtotal = items.reduce((sum, item) => sum + item.watch.price * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.unitPrice || item.watch.price) * item.quantity,
+    0
+  );
   const discountAmount = subtotal * discountPercentage;
   const total = Math.max(0, subtotal - discountAmount);
   const freeShippingThreshold = 2000;
@@ -35,7 +38,7 @@ export function CartDrawer() {
   const handlePromoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!promoInput.trim()) return;
-    const res = useCartStore.getState().applyPromoCode(promoInput);
+    const res = applyPromoCode(promoInput);
     if (res.success) {
       setPromoFeedback({ message: res.message, isError: false });
       setPromoInput("");
@@ -181,7 +184,7 @@ export function CartDrawer() {
                     </div>
 
                     <span className="text-xs font-semibold text-neutral-200">
-                      {formatCurrency(item.watch.price * item.quantity)}
+                      {formatCurrency((item.unitPrice || item.watch.price) * item.quantity)}
                     </span>
                   </div>
                 </div>
